@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITXpert Solutions | Technology Optimized</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=JetBrains+Mono&display=swap');
+
+        :root {
+            --bg: #030303;
+            --grid-color: rgba(255, 255, 255, 0.03);
+            --glow-color: rgba(59, 130, 246, 0.25);
+            --accent: #3b82f6;
+            --text-main: #ffffff;
+            --text-dim: #777777;
+            --border: rgba(255, 255, 255, 0.05);
+            --max-w: 2560px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .background-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .technical-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .scanline-y, .scanline-x {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.35;
+        }
+        .scanline-y { top: 0; left: 0; width: 100%; height: 2px; animation: scanY 8s linear infinite; }
+        .scanline-x { top: 0; left: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--accent), transparent); animation: scanX 10s linear infinite; }
+        @keyframes scanY { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
+        @keyframes scanX { 0% { transform: translateX(-10vw); } 100% { transform: translateX(110vw); } }
+
+        .cursor-glow {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle 600px at var(--x, 0px) var(--y, 0px), var(--glow-color), transparent 85%);
+        }
+
+        header, main, footer {
+            width: 100%;
+            max-width: var(--max-w);
+            position: relative;
+        }
+
+        header {
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(3, 3, 3, 0.85);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px; }
+        .logo span { color: var(--accent); }
+
+        nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; margin-left: 2.5rem; transition: 0.3s; }
+        nav a:hover { color: white; }
+
+        .hero { padding: 8vh 4rem 4vh 4rem; text-align: left; }
+        .hero h1 {
+            font-size: clamp(3.5rem, 12vw, 10rem);
+            font-weight: 900;
+            line-height: 0.8;
+            letter-spacing: -0.06em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+            position: relative;
+        }
+        .hero h1::before {
+            content: "TECH\A OPTIMIZED.";
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: white;
+            white-space: pre;
+            clip-path: circle(150px at var(--x, 0px) var(--y, 0px));
+            -webkit-text-stroke: 0px;
+        }
+
+        .hero p { font-size: 1.25rem; color: var(--text-dim); max-width: 900px; line-height: 1.7; text-align: justify; }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            border-top: 1px solid var(--border);
+            width: 100%;
+        }
+
+        .service-card {
+            padding: 5rem 4rem;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            transition: 0.4s;
+            background: rgba(3, 3, 3, 0.2);
+        }
+        .service-card:hover { background: rgba(255, 255, 255, 0.02); }
+
+        .card-label { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); display: block; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.2em; }
+        .service-card h3 { font-size: 2.2rem; font-weight: 600; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .service-card p { color: var(--text-dim); font-size: 1.2rem; line-height: 1.7; text-align: justify; }
+
+        footer {
+            padding: 5rem 4rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+            background: transparent; 
+            border-top: 1px solid var(--border);
+        }
+
+        .contact-block { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+        .contact-label { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); letter-spacing: 0.3em; text-transform: uppercase; }
+
+        .scramble-wrapper {
+            font-size: 2.2rem; 
+            font-weight: 600;
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            user-select: none;
+        }
+        .scramble-item { unicode-bidi: bidi-override; direction: rtl; }
+
+        .footer-bottom {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-dim);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-top: 1rem;
+        }
+
+        .coordinates { color: var(--accent); }
+
+        @media (max-width: 768px) {
+            header, .hero, .service-card, footer { padding: 2rem; }
+            .hero h1 { font-size: 4.5rem; }
+            .service-grid { grid-template-columns: 1fr; }
+            .service-card { border-right: none; }
+            .scramble-wrapper { font-size: 1.4rem; gap: 1rem; }
+            .hero p, .service-card p { text-align: left; }
+            .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-container">
+        <div class="technical-grid"></div>
+        <div class="scanline-y"></div>
+        <div class="scanline-x"></div>
+        <div class="cursor-glow" id="glow"></div>
+    </div>
+
+    <header>
+        <div class="logo">ITXpert <span>Solutions</span></div>
+        <nav>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h1 id="hero-text">TECH<br>OPTIMIZED.</h1>
+            <p>Leveraging over 25 years of industry-leading expertise to architect high-level IT infrastructure, advanced virtualization clusters, and secure, high-availability networking solutions. We build the resilient digital foundations that power the modern enterprise with precision engineering and veteran insight.</p>
+        </section>
+
+        <section id="services" class="service-grid">
+            <div class="service-card">
+                <span class="card-label">// Network</span>
+                <h3>Infrastructure</h3>
+                <p>Deploying resilient, high-bandwidth network architectures using advanced unified ecosystems. We specialize in software-defined networking, site-to-site connectivity, and robust wireless deployments designed for zero-latency operations and complete digital stability across large-scale enterprise environments.</p>
+            </div>
+            <div class="service-card">
+                <span class="card-label">// Compute</span>
+                <h3>Virtualization</h3>
+                <p>Architecting high-availability virtualization clusters that maximize hardware utility while ensuring seamless failover. Our solutions utilize bare-metal hypervisors and distributed management strategies to provide scalable, enterprise-grade compute power that adapts to the shifting demands of modern workloads.</p>
+            </div>
+            <div class="service-card">
+                <span class="card-label">// Storage</span>
+                <h3>Data Systems</h3>
+                <p>Engineered data management and hybrid-cloud storage solutions featuring multi-layer redundancy. We secure critical assets through professional NAS/SAN deployments, automated backup routines, and ironclad recovery protocols that protect against data loss and ensure rapid continuity during system anomalies.</p>
+            </div>
+            <div class="service-card">
+                <span class="card-label">// Vision</span>
+                <h3>Surveillance</h3>
+                <p>Integrating intelligent video surveillance and AI-driven identification technology for total perimeter control. Our security ecosystems feature centralized NVR management and high-accuracy license plate recognition (LPR), providing actionable intelligence and real-time situational awareness for sensitive facilities.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer id="contact">
+        <div class="contact-block">
+            <span class="contact-label">// Secure Communication Authority</span>
+            <div class="scramble-wrapper">
+                <div class="scramble-item">moc.lostrepxti@tcatnoc</div>
+                <div style="color: var(--accent);">•</div>
+                <div class="scramble-item">9742-527-042</div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div>© 2026 ITXPERT SOLUTIONS</div>
+            <div class="coordinates">NODE: 39° 10' 48" N, 77° 16' 12" W</div>
+        </div>
+    </footer>
+
+    <script>
+        const glow = document.getElementById('glow');
+        const hero = document.getElementById('hero-text');
+        window.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            glow.style.setProperty('--x', x + 'px');
+            glow.style.setProperty('--y', y + 'px');
+            if (hero) {
+                const rect = hero.getBoundingClientRect();
+                hero.style.setProperty('--x', (x - rect.left) + 'px');
+                hero.style.setProperty('--y', (y - rect.top) + 'px');
+            }
+        });
+    </script>
+</body>
+</html>

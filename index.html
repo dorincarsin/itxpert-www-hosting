@@ -51,10 +51,10 @@
             height: 100%;
         }
 
-        /* Stats Panel Header */
+        /* Stats Panel Header (V42: Raised to narrow gap with menu) */
         .stats-panel {
             position: fixed;
-            top: 100px;
+            top: 75px; /* V42: Raised from 100px to sit closer to the menu bar */
             right: 40px;
             z-index: 200;
             display: flex;
@@ -103,7 +103,6 @@
 
         .hero { padding: 12vh 4rem 6vh 4rem; text-align: left; }
         
-        /* Spotlightable Text Class */
         .spotlight-text {
             color: transparent;
             -webkit-text-stroke: 1px rgba(255,255,255,0.2);
@@ -181,7 +180,7 @@
             justify-content: center;
             flex-wrap: wrap;
             user-select: none;
-            color: #ffffff; /* Explicitly solid white for contact footer */
+            color: #ffffff;
         }
         .scramble-item { unicode-bidi: bidi-override; direction: rtl; }
 
@@ -282,7 +281,6 @@
         <div class="contact-block">
             <span class="contact-label">// Secure Communication Authority</span>
             <div class="scramble-wrapper">
-                <!-- V41 Fix: Removed spotlight from contact details, keeping them solid white -->
                 <div class="scramble-item">moc.lostrepxit@tcatnoc</div>
                 <div style="color: var(--accent);">•</div>
                 <div class="scramble-item">9742-527-042</div>
@@ -367,7 +365,8 @@
         const rackSpacing = 160; 
         for (let x = -2; x <= 2; x++) {
             for (let z = -2; z <= 2; z++) {
-                racks.push({ cx: x * rackSpacing, cz: z * rackSpacing, w: 70, d: 90, h: 300, bottom: 250 });
+                // V42: Racks raised further (bottom: 200) to sit higher in the frame
+                racks.push({ cx: x * rackSpacing, cz: z * rackSpacing, w: 70, d: 90, h: 300, bottom: 200 });
             }
         }
 
@@ -381,7 +380,8 @@
             y = y2; z = z2;
             z += 600; 
             let scale = 0; if (z > 0) scale = fov / z;
-            return { x: width / 2 + x * scale, y: height / 2 + y * scale - 150, scale: scale, z: z };
+            // V42: Projection raised dramatically (-250px offset) to center behind content
+            return { x: width / 2 + x * scale, y: height / 2 + y * scale - 250, scale: scale, z: z };
         }
 
         function drawRack(r, time) {
@@ -425,10 +425,7 @@
                     let ledX = (r.cx - dx) + (r.w / 3) * led + (r.w / 6);
                     let pLed = project({x: ledX, y: sy, z: r.cz-dz});
                     if (pLed && pLed.z > 0) {
-                        // V41 Fix: Slowed blinking 50% (multiplied time factors by 0.5)
-                        let blink = Math.sin(time * 0.0025 + serverSeed) + 
-                                    Math.sin(time * 0.006 + serverSeed * 2 + led) + 
-                                    Math.sin(time * 0.01 + led * 5);
+                        let blink = Math.sin(time * 0.0025 + serverSeed) + Math.sin(time * 0.006 + serverSeed * 2 + led) + Math.sin(time * 0.01 + led * 5);
                         if (blink > 1.2) {
                             ctx.beginPath();
                             ctx.arc(pLed.x, pLed.y, 1.2 * pLed.scale, 0, Math.PI * 2);
@@ -441,7 +438,6 @@
 
         function animate() {
             ctx.clearRect(0, 0, width, height);
-            // V41 Fix: Sped up rotation 50% (0.0015 -> 0.00225)
             angleY += 0.00225; 
             const time = Date.now();
             racks.forEach(r => { r.depthZ = r.cz * Math.cos(angleY) + r.cx * Math.sin(angleY); });

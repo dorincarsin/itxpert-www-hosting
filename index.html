@@ -16,9 +16,8 @@
 
         :root {
             --bg: #030303;
-            --grid-color: rgba(255, 255, 255, 0.03);
-            --glow-color: rgba(59, 130, 246, 0.25);
             --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
             --text-main: #ffffff;
             --text-dim: #777777;
             --border: rgba(255, 255, 255, 0.05);
@@ -38,38 +37,44 @@
             align-items: center;
         }
 
-        /* FIXED UNIFIED BACKGROUND LAYERS */
+        /* FIXED BACKGROUND CANVAS */
         .background-container {
             position: fixed;
             inset: 0;
             z-index: -1;
             pointer-events: none;
+            overflow: hidden;
+        }
+        #datacenter-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
 
-        .technical-grid {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 40px 40px;
-        }
-
-        .scanline-y, .scanline-x {
-            position: absolute;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0.35;
-        }
-        .scanline-y { top: 0; left: 0; width: 100%; height: 2px; animation: scanY 8s linear infinite; }
-        .scanline-x { top: 0; left: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, var(--accent), transparent); animation: scanX 10s linear infinite; }
-        @keyframes scanY { 0% { transform: translateY(-10vh); } 100% { transform: translateY(110vh); } }
-        @keyframes scanX { 0% { transform: translateX(-10vw); } 100% { transform: translateX(110vw); } }
-
-        .cursor-glow {
+        /* Stats Panel Header */
+        .stats-panel {
             position: fixed;
-            inset: 0;
-            background: radial-gradient(circle 600px at var(--x, 0px) var(--y, 0px), var(--glow-color), transparent 85%);
+            top: 100px;
+            right: 40px;
+            z-index: 200;
+            display: flex;
+            gap: 2rem;
+            background: rgba(3, 3, 3, 0.6);
+            padding: 12px 25px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 4px;
+            backdrop-filter: blur(8px);
+            pointer-events: none;
         }
+        .stat-block {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 90px;
+        }
+        .stat-label { font-size: 0.6rem; letter-spacing: 2px; opacity: 0.5; margin-bottom: 3px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+        .stat-value { font-size: 1.3rem; font-weight: bold; color: #ffffff; font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+        .stat-value span { font-size: 0.7rem; color: var(--accent); margin-left: 2px; }
 
         header, main, footer {
             width: 100%;
@@ -83,8 +88,8 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
-            background: rgba(3, 3, 3, 0.85);
-            backdrop-filter: blur(20px);
+            background: rgba(3, 3, 3, 0.7);
+            backdrop-filter: blur(15px);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -96,7 +101,27 @@
         nav a { color: var(--text-dim); text-decoration: none; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.2em; margin-left: 2.5rem; transition: 0.3s; }
         nav a:hover { color: white; }
 
-        .hero { padding: 8vh 4rem 4vh 4rem; text-align: left; }
+        .hero { padding: 12vh 4rem 6vh 4rem; text-align: left; }
+        
+        /* Spotlightable Text Class */
+        .spotlight-text {
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+            position: relative;
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+        .spotlight-text::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: white;
+            white-space: pre-wrap;
+            clip-path: circle(120px at var(--x, -1000px) var(--y, -1000px));
+            -webkit-text-stroke: 0px;
+        }
+
         .hero h1 {
             font-size: clamp(3.5rem, 12vw, 10rem);
             font-weight: 900;
@@ -104,19 +129,6 @@
             letter-spacing: -0.06em;
             text-transform: uppercase;
             margin-bottom: 2rem;
-            color: transparent;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.2);
-            position: relative;
-        }
-        .hero h1::before {
-            content: "TECH\A OPTIMIZED.";
-            position: absolute;
-            top: 0;
-            left: 0;
-            color: white;
-            white-space: pre;
-            clip-path: circle(150px at var(--x, 0px) var(--y, 0px));
-            -webkit-text-stroke: 0px;
         }
 
         .hero p { font-size: 1.25rem; color: var(--text-dim); max-width: 900px; line-height: 1.7; text-align: justify; }
@@ -126,6 +138,7 @@
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             border-top: 1px solid var(--border);
             width: 100%;
+            margin-top: 5vh;
         }
 
         .service-card {
@@ -133,16 +146,22 @@
             border-right: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
             transition: 0.4s;
-            background: rgba(3, 3, 3, 0.2);
+            background: transparent; 
         }
-        .service-card:hover { background: rgba(255, 255, 255, 0.02); }
+        .service-card:hover { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(4px); }
 
         .card-label { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: var(--accent); display: block; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.2em; }
-        .service-card h3 { font-size: 2.2rem; font-weight: 600; margin-bottom: 1.5rem; letter-spacing: -0.02em; }
+        .service-card h3 { 
+            font-size: 2.2rem; 
+            font-weight: 600; 
+            margin-bottom: 1.5rem; 
+            letter-spacing: -0.02em;
+            display: inline-block;
+        }
         .service-card p { color: var(--text-dim); font-size: 1.2rem; line-height: 1.7; text-align: justify; }
 
         footer {
-            padding: 5rem 4rem;
+            padding: 8rem 4rem 4rem 4rem;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -162,6 +181,7 @@
             justify-content: center;
             flex-wrap: wrap;
             user-select: none;
+            color: #ffffff; /* Explicitly solid white for contact footer */
         }
         .scramble-item { unicode-bidi: bidi-override; direction: rtl; }
 
@@ -173,10 +193,18 @@
             font-size: 0.75rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            margin-top: 1rem;
+            margin-top: 2rem;
         }
 
         .coordinates { color: var(--accent); }
+
+        .cursor-glow {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            background: radial-gradient(circle 500px at var(--mx, 0px) var(--my, 0px), rgba(59, 130, 246, 0.05), transparent 85%);
+            pointer-events: none;
+        }
 
         @media (max-width: 768px) {
             header, .hero, .service-card, footer { padding: 2rem; }
@@ -186,15 +214,30 @@
             .scramble-wrapper { font-size: 1.4rem; gap: 1rem; }
             .hero p, .service-card p { text-align: left; }
             .footer-bottom { flex-direction: column; gap: 1rem; text-align: center; }
+            .stats-panel { display: none; }
         }
     </style>
 </head>
 <body>
+    <div class="cursor-glow" id="glow"></div>
     <div class="background-container">
-        <div class="technical-grid"></div>
-        <div class="scanline-y"></div>
-        <div class="scanline-x"></div>
-        <div class="cursor-glow" id="glow"></div>
+        <canvas id="datacenter-canvas"></canvas>
+    </div>
+
+    <!-- Live Stats Panel -->
+    <div class="stats-panel">
+        <div class="stat-block">
+            <div class="stat-label">NETWORK I/O</div>
+            <div class="stat-value" id="stat-net">124.50<span>GB/s</span></div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-label">ACTIVE NODES</div>
+            <div class="stat-value" id="stat-nodes">1,402</div>
+        </div>
+        <div class="stat-block">
+            <div class="stat-label">COMPUTE LOAD</div>
+            <div class="stat-value" id="stat-load">84<span>%</span></div>
+        </div>
     </div>
 
     <header>
@@ -207,29 +250,29 @@
 
     <main>
         <section class="hero">
-            <h1 id="hero-text">TECH<br>OPTIMIZED.</h1>
+            <h1 class="spotlight-text" data-text="TECH&#10;OPTIMIZED.">TECH<br>OPTIMIZED.</h1>
             <p>Leveraging over 25 years of industry-leading expertise to architect high-level IT infrastructure, advanced virtualization clusters, and secure, high-availability networking solutions. We build the resilient digital foundations that power the modern enterprise with precision engineering and veteran insight.</p>
         </section>
 
         <section id="services" class="service-grid">
             <div class="service-card">
                 <span class="card-label">// Network</span>
-                <h3>Infrastructure</h3>
+                <h3 class="spotlight-text" data-text="Infrastructure">Infrastructure</h3>
                 <p>Deploying resilient, high-bandwidth network architectures using advanced unified ecosystems. We specialize in software-defined networking, site-to-site connectivity, and robust wireless deployments designed for zero-latency operations and complete digital stability across large-scale enterprise environments.</p>
             </div>
             <div class="service-card">
                 <span class="card-label">// Compute</span>
-                <h3>Virtualization</h3>
+                <h3 class="spotlight-text" data-text="Virtualization">Virtualization</h3>
                 <p>Architecting high-availability virtualization clusters that maximize hardware utility while ensuring seamless failover. Our solutions utilize bare-metal hypervisors and distributed management strategies to provide scalable, enterprise-grade compute power that adapts to the shifting demands of modern workloads.</p>
             </div>
             <div class="service-card">
                 <span class="card-label">// Storage</span>
-                <h3>Data Systems</h3>
+                <h3 class="spotlight-text" data-text="Data Systems">Data Systems</h3>
                 <p>Engineered data management and hybrid-cloud storage solutions featuring multi-layer redundancy. We secure critical assets through professional NAS/SAN deployments, automated backup routines, and ironclad recovery protocols that protect against data loss and ensure rapid continuity during system anomalies.</p>
             </div>
             <div class="service-card">
                 <span class="card-label">// Vision</span>
-                <h3>Surveillance</h3>
+                <h3 class="spotlight-text" data-text="Surveillance">Surveillance</h3>
                 <p>Integrating intelligent video surveillance and AI-driven identification technology for total perimeter control. Our security ecosystems feature centralized NVR management and high-accuracy license plate recognition (LPR), providing actionable intelligence and real-time situational awareness for sensitive facilities.</p>
             </div>
         </section>
@@ -239,6 +282,7 @@
         <div class="contact-block">
             <span class="contact-label">// Secure Communication Authority</span>
             <div class="scramble-wrapper">
+                <!-- V41 Fix: Removed spotlight from contact details, keeping them solid white -->
                 <div class="scramble-item">moc.lostrepxit@tcatnoc</div>
                 <div style="color: var(--accent);">•</div>
                 <div class="scramble-item">9742-527-042</div>
@@ -249,26 +293,163 @@
             <div style="text-align: right;">
                 <div class="coordinates">NODE: 39° 10' 48" N, 77° 16' 12" W</div>
                 <div style="font-size: 0.6rem; margin-top: 0.5rem; opacity: 0.6;">
-                    COVERAGE // GERMANTOWN • BETHESDA • ROCKVILLE • WASHINGTON DC • ARLINGTON
+                    COVERAGE // GERMANTOWN • BETHESDA • Rockville • Washington DC • Arlington
                 </div>
             </div>
         </div>
     </footer>
 
     <script>
+        // --- 1. UI: Mouse Tracking ---
         const glow = document.getElementById('glow');
-        const hero = document.getElementById('hero-text');
+        const spotlightElements = document.querySelectorAll('.hero .spotlight-text, .service-card .spotlight-text');
+
         window.addEventListener('mousemove', (e) => {
-            const x = e.clientX;
-            const y = e.clientY;
-            glow.style.setProperty('--x', x + 'px');
-            glow.style.setProperty('--y', y + 'px');
-            if (hero) {
-                const rect = hero.getBoundingClientRect();
-                hero.style.setProperty('--x', (x - rect.left) + 'px');
-                hero.style.setProperty('--y', (y - rect.top) + 'px');
-            }
+            const mx = e.clientX;
+            const my = e.clientY;
+            glow.style.setProperty('--mx', mx + 'px');
+            glow.style.setProperty('--my', my + 'px');
+            spotlightElements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                el.style.setProperty('--x', (mx - rect.left) + 'px');
+                el.style.setProperty('--y', (my - rect.top) + 'px');
+            });
         });
+
+        // --- 2. UI: Rapid Stats Simulation ---
+        const elNet = document.getElementById('stat-net');
+        const elNodes = document.getElementById('stat-nodes');
+        const elLoad = document.getElementById('stat-load');
+        let currentNet = 125.0;
+        let currentLoad = 82;
+        let nodeTarget = 1402;
+        let currentNode = 1402;
+
+        setInterval(() => {
+            currentNet += (Math.random() - 0.5) * 10; 
+            if (currentNet < 110) currentNet = 110 + Math.random() * 5;
+            if (currentNet > 155) currentNet = 155 - Math.random() * 5;
+            elNet.innerHTML = currentNet.toFixed(2) + '<span>GB/s</span>';
+            currentLoad += (Math.random() - 0.5) * 8;
+            if (currentLoad < 78) currentLoad = 78 + Math.random() * 2;
+            if (currentLoad > 96) currentLoad = 94 - Math.random() * 2;
+            elLoad.innerHTML = Math.round(currentLoad) + '<span>%</span>';
+        }, 120); 
+
+        setInterval(() => { nodeTarget = 1400 + Math.floor((Math.random() - 0.5) * 12); }, 800);
+        setInterval(() => {
+            if (currentNode < nodeTarget) currentNode++;
+            else if (currentNode > nodeTarget) currentNode--;
+            elNodes.innerHTML = currentNode.toLocaleString();
+        }, 200);
+
+        // --- 3. Animation Engine: 3D Datacenter ---
+        const canvas = document.getElementById('datacenter-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, angleY = 0;
+        const fov = 800;
+        let racks = [];
+        const colorDim = 'rgba(59, 130, 246, 0.08)'; 
+        const colorServer = 'rgba(59, 130, 246, 0.15)'; 
+        const colorLED = 'rgba(59, 130, 246, 0.85)'; 
+
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.scale(dpr, dpr);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const rackSpacing = 160; 
+        for (let x = -2; x <= 2; x++) {
+            for (let z = -2; z <= 2; z++) {
+                racks.push({ cx: x * rackSpacing, cz: z * rackSpacing, w: 70, d: 90, h: 300, bottom: 250 });
+            }
+        }
+
+        function project(p) {
+            let x = p.x * Math.cos(angleY) - p.z * Math.sin(angleY);
+            let z = p.z * Math.cos(angleY) + p.x * Math.sin(angleY);
+            let y = p.y;
+            const tilt = 0.2;
+            let y2 = y * Math.cos(tilt) - z * Math.sin(tilt);
+            let z2 = z * Math.cos(tilt) + y * Math.sin(tilt);
+            y = y2; z = z2;
+            z += 600; 
+            let scale = 0; if (z > 0) scale = fov / z;
+            return { x: width / 2 + x * scale, y: height / 2 + y * scale - 150, scale: scale, z: z };
+        }
+
+        function drawRack(r, time) {
+            const dx = r.w/2, dz = r.d/2;
+            const top = r.bottom - r.h;
+            const pts = [
+                {x: r.cx-dx, y: r.bottom, z: r.cz-dz}, {x: r.cx+dx, y: r.bottom, z: r.cz-dz},
+                {x: r.cx+dx, y: r.bottom, z: r.cz+dz}, {x: r.cx-dx, y: r.bottom, z: r.cz+dz},
+                {x: r.cx-dx, y: top, z: r.cz-dz}, {x: r.cx+dx, y: top, z: r.cz-dz},
+                {x: r.cx+dx, y: top, z: r.cz+dz}, {x: r.cx-dx, y: top, z: r.cz+dz}
+            ];
+            const proj = pts.map(project);
+            let visible = false;
+            for(let i=0; i<8; i++) if (proj[i].z > 0) visible = true;
+            if (!visible) return;
+
+            ctx.strokeStyle = colorDim; ctx.lineWidth = 1; ctx.beginPath();
+            ctx.moveTo(proj[0].x, proj[0].y); ctx.lineTo(proj[1].x, proj[1].y); ctx.lineTo(proj[2].x, proj[2].y); ctx.lineTo(proj[3].x, proj[3].y); ctx.closePath();
+            ctx.moveTo(proj[4].x, proj[4].y); ctx.lineTo(proj[5].x, proj[5].y); ctx.lineTo(proj[6].x, proj[6].y); ctx.lineTo(proj[7].x, proj[7].y); ctx.closePath();
+            ctx.moveTo(proj[0].x, proj[0].y); ctx.lineTo(proj[4].x, proj[4].y); ctx.moveTo(proj[1].x, proj[1].y); ctx.lineTo(proj[5].x, proj[5].y);
+            ctx.moveTo(proj[2].x, proj[2].y); ctx.lineTo(proj[6].x, proj[6].y); ctx.moveTo(proj[3].x, proj[3].y); ctx.lineTo(proj[7].x, proj[7].y);
+            ctx.stroke();
+
+            const numServers = 24; 
+            ctx.strokeStyle = colorServer; ctx.beginPath();
+            for (let i = 1; i <= numServers; i++) {
+                let sy = r.bottom - (r.h / numServers) * i;
+                let p1 = project({x: r.cx-dx, y: sy, z: r.cz-dz});
+                let p2 = project({x: r.cx+dx, y: sy, z: r.cz-dz});
+                if(p1.z > 0 && p2.z > 0) { ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); }
+            }
+            ctx.stroke();
+
+            let baseSeed = r.cx * 13 + r.cz * 17;
+            for (let i = 1; i <= numServers; i++) {
+                let sy = r.bottom - (r.h / numServers) * i;
+                let serverSeed = baseSeed + i * 23;
+                let isActive = (Math.sin(serverSeed * 0.1) + 1) / 2 > 0.2;
+                if (!isActive) continue;
+                for (let led = 0; led < 3; led++) {
+                    let ledX = (r.cx - dx) + (r.w / 3) * led + (r.w / 6);
+                    let pLed = project({x: ledX, y: sy, z: r.cz-dz});
+                    if (pLed && pLed.z > 0) {
+                        // V41 Fix: Slowed blinking 50% (multiplied time factors by 0.5)
+                        let blink = Math.sin(time * 0.0025 + serverSeed) + 
+                                    Math.sin(time * 0.006 + serverSeed * 2 + led) + 
+                                    Math.sin(time * 0.01 + led * 5);
+                        if (blink > 1.2) {
+                            ctx.beginPath();
+                            ctx.arc(pLed.x, pLed.y, 1.2 * pLed.scale, 0, Math.PI * 2);
+                            ctx.fillStyle = colorLED; ctx.fill();
+                        }
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            // V41 Fix: Sped up rotation 50% (0.0015 -> 0.00225)
+            angleY += 0.00225; 
+            const time = Date.now();
+            racks.forEach(r => { r.depthZ = r.cz * Math.cos(angleY) + r.cx * Math.sin(angleY); });
+            racks.sort((a, b) => b.depthZ - a.depthZ);
+            racks.forEach(r => drawRack(r, time));
+            requestAnimationFrame(animate);
+        }
+        animate();
     </script>
 </body>
 </html>
